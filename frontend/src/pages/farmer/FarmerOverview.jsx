@@ -73,6 +73,16 @@ export default function FarmerOverview() {
                 <div className="request-meta">
                   {req.pickup_location} → {req.dropoff_location} • {req.weight}kg • {req.preferred_date}
                 </div>
+                {req.vehicle && (
+                  <div style={{ marginTop: '0.4rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: '#f0fdf4', border: '1px solid #dcfce7', color: '#16a34a', padding: '0.2rem 0.5rem', borderRadius: '6px', fontSize: '0.8rem', fontWeight: '600' }}>
+                    🚛 {req.vehicle.type} ({req.vehicle.plate_number}) · Driver: {req.driver?.name || 'Assigned'}
+                  </div>
+                )}
+                {req.rejection_reason && (
+                  <div style={{ marginTop: '0.4rem', color: '#ef4444', fontSize: '0.8rem', fontWeight: '500', background: '#fef2f2', padding: '0.4rem 0.8rem', borderRadius: '6px', border: '1px solid #fee2e2', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
+                    ⚠️ Driver Rejection Reason: "{req.rejection_reason}"
+                  </div>
+                )}
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
                 <div className={`status-badge status-${req.status?.toLowerCase() || 'pending'}`}>{req.status}</div>

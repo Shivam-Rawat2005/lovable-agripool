@@ -11,10 +11,19 @@ export default function PortalSelection() {
   const handlePortalClick = async (portalId, path) => {
     const user = authService.getCurrentUser();
     
-    // If they are already logged in (maybe as a real user), just let them through
+    // If they are already logged in (maybe as a real user), let's verify if the session is actually valid
     if (user) {
-      navigate(path, { replace: true });
-      return;
+      setLoadingPortal(portalId);
+      try {
+        await authService.me();
+        navigate(path, { replace: true });
+        return;
+      } catch (e) {
+        // Session is invalid on backend, clear it and proceed to demo login
+        localStorage.removeItem('user');
+      } finally {
+        setLoadingPortal(null);
+      }
     }
 
     // Auto-login logic for demo mode
@@ -89,6 +98,16 @@ export default function PortalSelection() {
             </div>
           </div>
         ))}
+      </div>
+
+      <div style={{ marginTop: '2.5rem', textAlign: 'center', fontSize: '1rem', color: 'var(--text-muted)' }}>
+        Are you a registered user?{' '}
+        <button 
+          onClick={() => navigate('/login')}
+          style={{ background: 'transparent', border: 'none', color: 'var(--primary-emerald)', fontWeight: '600', textDecoration: 'underline', cursor: 'pointer', padding: 0 }}
+        >
+          Sign in to your account
+        </button>
       </div>
 
       <div style={{ marginTop: 'auto', paddingTop: '4rem' }}>

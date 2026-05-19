@@ -19,8 +19,6 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->render(function (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::error('API Error: ' . $e->getMessage(), [
-                'request' => request()->all(),
-            ]);
+            \Illuminate\Support\Facades\Log::error($e);
         });
     })->create();

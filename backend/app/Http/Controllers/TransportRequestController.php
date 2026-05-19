@@ -12,12 +12,12 @@ class TransportRequestController extends Controller
     {
         $user = Auth::user();
         if ($user->role === 'driver' || $user->role === 'admin') {
-            return TransportRequest::with('farmer')
+            return TransportRequest::with(['farmer', 'vehicle'])
                 ->where('status', 'Pending')
                 ->orWhere('driver_id', Auth::id())
                 ->get();
         }
-        return TransportRequest::with('driver')->where('farmer_id', Auth::id())->get();
+        return TransportRequest::with(['driver', 'vehicle'])->where('farmer_id', Auth::id())->get();
     }
 
     public function store(Request $request)
@@ -40,6 +40,9 @@ class TransportRequestController extends Controller
             'preferred_date' => $request->preferred_date,
             'notes' => $request->notes,
             'status' => 'Pending',
+            'escrow_status' => 'held_in_escrow',
+            'payment_amount' => $request->weight * 10, // ₹10 per kg standard rate
+            'payout' => $request->weight * 8.5,        // ₹8.5 per kg driver payout
         ]);
 
         return response()->json([

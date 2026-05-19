@@ -79,11 +79,11 @@ export default function CommandCenter() {
           <div style={{ marginTop: '2rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', padding: '1rem 0', borderBottom: '1px solid #f1f5f9' }}>
               <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Avg trip cost</div>
-              <div style={{ fontWeight: '700' }}>₹4,820</div>
+              <div style={{ fontWeight: '700' }}>{data.stats.avg_trip_cost || '₹0'}</div>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', padding: '1rem 0', borderBottom: '1px solid #f1f5f9' }}>
-              <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Open complaints</div>
-              <div style={{ fontWeight: '700', color: '#b91c1c' }}>2</div>
+              <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Completed trips</div>
+              <div style={{ fontWeight: '700', color: 'var(--primary-emerald)' }}>{data.stats.completed_trips || 0}</div>
             </div>
           </div>
         </div>

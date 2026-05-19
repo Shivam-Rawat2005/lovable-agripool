@@ -69,4 +69,30 @@ class AuthController extends Controller
     {
         return response()->json($request->user());
     }
+
+    public function updateProfile(Request $request)
+    {
+        $user = $request->user();
+        
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'phone' => 'nullable|string|max:255',
+            'farm_size' => 'nullable|numeric',
+            'location' => 'nullable|string|max:255',
+            'primary_crops' => 'nullable|string|max:255',
+        ]);
+
+        $user->update([
+            'name' => $request->name,
+            'phone' => $request->phone,
+            'farm_size' => $request->farm_size,
+            'location' => $request->location,
+            'primary_crops' => $request->primary_crops,
+        ]);
+
+        return response()->json([
+            'user' => $user,
+            'message' => 'Profile updated successfully'
+        ]);
+    }
 }

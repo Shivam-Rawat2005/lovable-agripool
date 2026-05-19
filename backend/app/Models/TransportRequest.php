@@ -12,6 +12,7 @@ class TransportRequest extends Model
     protected $fillable = [
         'farmer_id',
         'driver_id',
+        'vehicle_id',
         'crop_type',
         'weight',
         'pickup_location',
@@ -21,6 +22,9 @@ class TransportRequest extends Model
         'status',
         'pool_id',
         'payout',
+        'escrow_status',
+        'payment_amount',
+        'rejection_reason',
     ];
 
     public function farmer()
@@ -31,5 +35,10 @@ class TransportRequest extends Model
     public function driver()
     {
         return $this->belongsTo(User::class, 'driver_id');
+    }
+
+    public function vehicle()
+    {
+        return $this->belongsTo(Vehicle::class, 'vehicle_id');
     }
 }

@@ -14,6 +14,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanc
 
 Route::middleware('auth:sanctum')->group(function() {
     Route::get('/user', [AuthController::class, 'user']);
+    Route::put('/user/profile', [AuthController::class, 'updateProfile']);
     
     // Dashboards
     Route::get('/dashboard/farmer', [DashboardController::class, 'farmer']);
@@ -33,6 +34,7 @@ Route::middleware('auth:sanctum')->group(function() {
     Route::get('/pools', [PoolController::class, 'index']);
     Route::post('/pools', [PoolController::class, 'store']);
     Route::post('/pools/{id}/join', [PoolController::class, 'join']);
+    Route::post('/pools/{poolId}/reject/{requestId}', [PoolController::class, 'rejectFarmer']);
 
     // Vehicles
     Route::get('/vehicles', [VehicleController::class, 'index']);
@@ -43,4 +45,8 @@ Route::middleware('auth:sanctum')->group(function() {
     Route::post('/jobs/pool/{id}/accept', [\App\Http\Controllers\TripController::class, 'acceptPool']);
     Route::post('/jobs/{id}/{type}/start', [\App\Http\Controllers\TripController::class, 'startJob']);
     Route::post('/jobs/{id}/{type}/complete', [\App\Http\Controllers\TripController::class, 'completeJob']);
+
+    // Admin Escrow Settlements
+    Route::get('/admin/settlements', [\App\Http\Controllers\TripController::class, 'getPendingSettlements']);
+    Route::post('/admin/settlements/{id}/approve', [\App\Http\Controllers\TripController::class, 'approveSettlement']);
 });

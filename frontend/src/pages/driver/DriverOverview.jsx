@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Wallet, Share2, TrendingUp, Truck, ArrowRight } from 'lucide-react';
 import api from '../../services/api';
 
 export default function DriverOverview() {
+  const navigate = useNavigate();
   const [showForm, setShowForm] = useState(false);
   const [newTrip, setNewTrip] = useState({
     route_start: '',
@@ -21,12 +23,17 @@ export default function DriverOverview() {
     },
     recent_trips: []
   });
+  const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const fetchDashboard = async () => {
     try {
-      const response = await api.get('/dashboard/driver');
-      setData(response.data);
+      const [dashRes, vehRes] = await Promise.all([
+        api.get('/dashboard/driver'),
+        api.get('/vehicles')
+      ]);
+      setData(dashRes.data);
+      setVehicles(vehRes.data);
     } catch (error) {
       console.error('Failed to fetch driver dashboard', error);
     } finally {
@@ -40,22 +47,26 @@ export default function DriverOverview() {
 
   const handleCreateTrip = async (e) => {
     e.preventDefault();
+    if (!newTrip.vehicle_id) {
+      alert('Please select a vehicle to schedule the trip!');
+      return;
+    }
     try {
       await api.post('/pools', newTrip);
       alert('Trip scheduled! Farmers can now see and join your route.');
       setShowForm(false);
       fetchDashboard();
     } catch (error) {
-      alert('Failed to schedule trip');
+      alert('Failed to schedule trip: ' + (error.response?.data?.message || error.message));
     }
   };
 
   if (loading) return <div style={{ padding: '2rem', textAlign: 'center' }}>Loading dashboard...</div>;
 
   const statsList = [
-    { label: 'This Month', value: data.stats.earnings, icon: <Wallet size={20} /> },
+    { label: 'Available Wallet', value: data.stats.earnings, icon: <Wallet size={20} /> },
+    { label: 'Pending Release', value: data.stats.pending_earnings || '₹0', icon: <TrendingUp size={20} /> },
     { label: 'Active Trips', value: data.stats.active_trips, icon: <Share2 size={20} /> },
-    { label: 'Total Trips', value: data.stats.total_trips, icon: <TrendingUp size={20} /> },
     { label: 'Vehicles', value: data.stats.vehicles, icon: <Truck size={20} /> },
   ];
 
@@ -67,7 +78,15 @@ export default function DriverOverview() {
           <p style={{ color: 'var(--text-muted)' }}>Your fleet at a glance.</p>
         </div>
         <button 
-          onClick={() => setShowForm(!showForm)}
+          onClick={() => {
+            if (vehicles.length === 0) {
+              if (window.confirm('You must register vehicle details before scheduling a new trip! Would you like to add a vehicle now?')) {
+                navigate('/driver/vehicles/new');
+              }
+              return;
+            }
+            setShowForm(!showForm);
+          }}
           style={{ background: 'var(--primary-emerald)', color: 'white', padding: '0.75rem 1.5rem', borderRadius: 'var(--radius-md)', fontWeight: '600', border: 'none', cursor: 'pointer' }}
         >
           {showForm ? 'Cancel' : '+ Schedule New Trip'}
@@ -76,6 +95,26 @@ export default function DriverOverview() {
 
       {showForm && (
         <form onSubmit={handleCreateTrip} className="section-card" style={{ marginBottom: '3rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', alignItems: 'flex-end', background: '#f8fafc', border: '2px solid var(--primary-emerald)' }}>
+          <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <label style={{ fontWeight: '600', color: 'var(--emerald-deep)', fontSize: '0.85rem' }}>Select Vehicle</label>
+            <select 
+              required 
+              style={{ padding: '0.8rem', borderRadius: '8px', border: '1px solid #cbd5e1', background: 'white', color: 'var(--text-main)', fontSize: '0.9rem' }} 
+              onChange={e => {
+                const veh = vehicles.find(v => v._id === e.target.value);
+                setNewTrip({
+                  ...newTrip, 
+                  vehicle_id: e.target.value,
+                  total_capacity: veh ? veh.capacity : 5000
+                });
+              }}
+            >
+              <option value="">-- Choose Vehicle --</option>
+              {vehicles.map(v => (
+                <option key={v._id} value={v._id}>{v.type} ({v.plate_number}) - {v.capacity} kg</option>
+              ))}
+            </select>
+          </div>
           <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             <label style={{ fontWeight: '600', color: 'var(--emerald-deep)', fontSize: '0.85rem' }}>Start Location</label>
             <input type="text" placeholder="e.g. Nashik" required style={{ padding: '0.8rem', borderRadius: '8px', border: '1px solid #cbd5e1' }} onChange={e => setNewTrip({...newTrip, route_start: e.target.value})} />
@@ -125,7 +164,7 @@ export default function DriverOverview() {
             const isRequest = trip.type === 'Request';
             const route = isRequest ? `${trip.pickup_location} → ${trip.dropoff_location}` : `${trip.route_start} → ${trip.route_end}`;
             const date = isRequest ? trip.preferred_date : trip.date;
-            const payout = isRequest ? (trip.weight * 6.5) : (trip.current_weight * (trip.price_per_kg || 5.5));
+            const payout = trip.calculated_payout || 0;
             return (
             <div key={trip._id} className="request-item">
               <div className="request-main">

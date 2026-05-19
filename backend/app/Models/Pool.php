@@ -11,6 +11,7 @@ class Pool extends Model
 
     protected $fillable = [
         'driver_id',
+        'vehicle_id',
         'route_start',
         'route_end',
         'date',
@@ -28,5 +29,10 @@ class Pool extends Model
     public function transportRequests()
     {
         return $this->hasMany(TransportRequest::class, 'pool_id');
+    }
+
+    public function vehicle()
+    {
+        return $this->belongsTo(Vehicle::class, 'vehicle_id');
     }
 }

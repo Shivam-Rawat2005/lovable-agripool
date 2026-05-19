@@ -2,14 +2,31 @@ import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
 
 export default function FarmerProfile() {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    try {
+      const stored = localStorage.getItem('user');
+      return stored ? JSON.parse(stored) : null;
+    } catch {
+      return null;
+    }
+  });
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  // Form State
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+  const [farmSize, setFarmSize] = useState('');
+  const [location, setLocation] = useState('');
+  const [primaryCrops, setPrimaryCrops] = useState('');
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
         const response = await api.get('/user');
         setUser(response.data);
+        localStorage.setItem('user', JSON.stringify(response.data));
       } catch (error) {
         console.error('Failed to fetch user', error);
       } finally {
@@ -19,7 +36,39 @@ export default function FarmerProfile() {
     fetchUser();
   }, []);
 
-  if (loading) return <div style={{ padding: '2rem', textAlign: 'center' }}>Loading profile...</div>;
+  // Sync state when user object loads
+  useEffect(() => {
+    if (user) {
+      setName(user.name || '');
+      setPhone(user.phone || '');
+      setEmail(user.email || '');
+      setFarmSize(user.farm_size || '');
+      setLocation(user.location || '');
+      setPrimaryCrops(user.primary_crops || '');
+    }
+  }, [user]);
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    try {
+      setSaving(true);
+      const response = await api.put('/user/profile', {
+        name,
+        phone,
+        farm_size: farmSize,
+        location,
+        primary_crops: primaryCrops
+      });
+      setUser(response.data.user);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+      alert('Profile updated successfully!');
+    } catch (error) {
+      console.error('Failed to update profile', error);
+      alert('Failed to update profile');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <div style={{ maxWidth: '800px' }}>
@@ -28,66 +77,77 @@ export default function FarmerProfile() {
         <p style={{ color: 'var(--text-muted)' }}>Manage your farm details and contact info.</p>
       </div>
 
-      <div className="section-card">
+      <div className="section-card" style={{ border: '1px solid var(--border-light)', boxShadow: 'var(--shadow-sm)' }}>
         <h2 style={{ fontSize: '1.1rem', marginBottom: '2rem' }}>Account</h2>
         
-        <form style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+        <form onSubmit={handleSave} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
           <div className="form-group">
-            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '600', marginBottom: '0.5rem' }}>Full name</label>
+            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '600', marginBottom: '0.5rem', color: 'var(--text-main)' }}>Full name</label>
             <input 
               type="text" 
-              defaultValue={user?.name || ''}
-              style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', outline: 'none' }}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', outline: 'none', background: '#ffffff', color: '#1e293b' }}
+              required
             />
           </div>
           <div className="form-group">
-            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '600', marginBottom: '0.5rem' }}>Phone</label>
+            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '600', marginBottom: '0.5rem', color: 'var(--text-main)' }}>Phone</label>
             <input 
               type="text" 
-              defaultValue={user?.phone || '+91 98765 43210'}
-              style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', outline: 'none' }}
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="+91 XXXXX XXXXX"
+              style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', outline: 'none', background: '#ffffff', color: '#1e293b' }}
             />
           </div>
           <div className="form-group">
-            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '600', marginBottom: '0.5rem' }}>Email</label>
+            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '600', marginBottom: '0.5rem', color: 'var(--text-main)' }}>Email</label>
             <input 
               type="email" 
-              defaultValue={user?.email || ''}
-              style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', outline: 'none' }}
+              value={email}
+              disabled
+              style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', outline: 'none', background: '#f8fafc', color: 'var(--text-muted)', cursor: 'not-allowed' }}
             />
           </div>
           <div className="form-group">
-            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '600', marginBottom: '0.5rem' }}>Farm size (acres)</label>
+            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '600', marginBottom: '0.5rem', color: 'var(--text-main)' }}>Farm size (acres)</label>
             <input 
               type="number" 
-              defaultValue={user?.farm_size || '12'}
-              style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', outline: 'none' }}
+              value={farmSize}
+              onChange={(e) => setFarmSize(e.target.value)}
+              placeholder="e.g. 10"
+              style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', outline: 'none', background: '#ffffff', color: '#1e293b' }}
             />
           </div>
           <div className="form-group" style={{ gridColumn: 'span 2' }}>
-            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '600', marginBottom: '0.5rem' }}>Farm location</label>
+            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '600', marginBottom: '0.5rem', color: 'var(--text-main)' }}>Farm location</label>
             <input 
               type="text" 
-              defaultValue={user?.location || 'Pimpalgaon, Nashik, Maharashtra'}
-              style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', outline: 'none' }}
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              placeholder="Pimpalgaon, Nashik, Maharashtra"
+              style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', outline: 'none', background: '#ffffff', color: '#1e293b' }}
             />
           </div>
           <div className="form-group" style={{ gridColumn: 'span 2' }}>
-            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '600', marginBottom: '0.5rem' }}>Primary crops</label>
+            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '600', marginBottom: '0.5rem', color: 'var(--text-main)' }}>Primary crops</label>
             <input 
               type="text" 
-              defaultValue={user?.primary_crops || 'Tomatoes, Onions, Grapes'}
-              style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', outline: 'none' }}
+              value={primaryCrops}
+              onChange={(e) => setPrimaryCrops(e.target.value)}
+              placeholder="Tomatoes, Onions, Grapes"
+              style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', outline: 'none', background: '#ffffff', color: '#1e293b' }}
             />
           </div>
 
-          <div style={{ marginTop: '1rem' }}>
+          <div style={{ marginTop: '1rem', gridColumn: 'span 2' }}>
             <button 
-              type="button"
-              style={{ background: 'var(--primary-emerald)', color: 'white', padding: '0.75rem 2rem', borderRadius: 'var(--radius-md)', fontWeight: '600' }}
-              onClick={() => alert('Profile update saved!')}
+              type="submit"
+              disabled={saving}
+              style={{ background: 'var(--primary-emerald)', color: 'white', padding: '0.75rem 2rem', borderRadius: 'var(--radius-md)', fontWeight: '600', border: 'none', cursor: 'pointer' }}
             >
-              Save changes
+              {saving ? 'Saving...' : 'Save changes'}
             </button>
           </div>
         </form>

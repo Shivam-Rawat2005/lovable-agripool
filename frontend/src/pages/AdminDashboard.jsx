@@ -14,11 +14,22 @@ import UserManagement from './admin/UserManagement';
 import LogisticsOversight from './admin/LogisticsOversight';
 import AdminReports from './admin/AdminReports';
 import ComplaintsSupport from './admin/ComplaintsSupport';
+import authService from '../services/authService';
 import './FarmerDashboard.css'; // Reusing base layout styles
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const location = useLocation();
+  const user = authService.getCurrentUser();
+
+  const handleLogout = async () => {
+    try {
+      await authService.logout();
+    } catch (e) {
+      console.error('Logout failed:', e);
+    }
+    navigate('/login');
+  };
 
   const menuItems = [
     { label: 'Command Center', icon: <LayoutDashboard size={20} />, path: '/admin' },
@@ -61,7 +72,7 @@ export default function AdminDashboard() {
         </nav>
 
         <div className="sidebar-footer">
-          <div className="nav-item" onClick={() => navigate('/portals')}>
+          <div className="nav-item" onClick={handleLogout}>
             <LogOut size={20} />
             Sign out
           </div>
@@ -73,11 +84,15 @@ export default function AdminDashboard() {
         <header className="top-bar">
           <div className="user-profile">
             <div className="user-info">
-              <span className="user-name">Admin Sharma</span>
-              <span className="user-role" style={{ background: '#f1f5f9', color: '#475569' }}>Admin</span>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Demo session</span>
+              <span className="user-name">{user?.name || 'Admin Sharma'}</span>
+              <span className="user-role" style={{ background: '#f1f5f9', color: '#475569', textTransform: 'capitalize' }}>{user?.role || 'admin'}</span>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                {user?.email?.includes('demo.com') ? 'Demo session' : 'Registered session'}
+              </span>
             </div>
-            <div className="avatar" style={{ background: '#475569' }}>A</div>
+            <div className="avatar" style={{ background: '#475569' }}>
+              {(user?.name || 'Admin Sharma').charAt(0).toUpperCase()}
+            </div>
           </div>
         </header>
 

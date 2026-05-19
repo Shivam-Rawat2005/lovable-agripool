@@ -21,7 +21,10 @@ export default function Landing() {
           <a href="#roles" className="nav-link">Roles</a>
           <a href="#how-it-works" className="nav-link">How it works</a>
         </div>
-        <button className="btn-demo" onClick={() => navigate('/portals')}>Open demo</button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <button className="btn-signin" onClick={() => navigate('/login')}>Sign in</button>
+          <button className="btn-demo" onClick={() => navigate('/portals')}>Open demo</button>
+        </div>
       </nav>
 
       {/* Hero Section */}
