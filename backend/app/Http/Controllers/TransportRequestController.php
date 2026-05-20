@@ -40,7 +40,7 @@ class TransportRequestController extends Controller
             'preferred_date' => $request->preferred_date,
             'notes' => $request->notes,
             'status' => 'Pending',
-            'escrow_status' => 'held_in_escrow',
+            'escrow_status' => 'unpaid',
             'payment_amount' => $request->weight * 10, // ₹10 per kg standard rate
             'payout' => $request->weight * 8.5,        // ₹8.5 per kg driver payout
         ]);
@@ -54,5 +54,18 @@ class TransportRequestController extends Controller
     public function show($id)
     {
         return TransportRequest::findOrFail($id);
+    }
+
+    public function payRequest($id)
+    {
+        $transportRequest = TransportRequest::findOrFail($id);
+        $transportRequest->update([
+            'escrow_status' => 'held_in_escrow'
+        ]);
+
+        return response()->json([
+            'message' => 'Payment successful! Funds are held in Escrow.',
+            'request' => $transportRequest
+        ]);
     }
 }

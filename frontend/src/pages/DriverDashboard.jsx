@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, 
@@ -16,13 +16,28 @@ import AssignedTrips from './driver/AssignedTrips';
 import DriverEarnings from './driver/DriverEarnings';
 import AddVehicle from './driver/AddVehicle';
 import authService from '../services/authService';
+import api from '../services/api';
+import ChatWidget from '../components/ChatWidget';
 import './FarmerDashboard.css'; // Reusing base layout styles
 import './DriverDashboard.css';
 
 export default function DriverDashboard() {
   const navigate = useNavigate();
   const location = useLocation();
-  const user = authService.getCurrentUser();
+  const [user, setUser] = useState(() => authService.getCurrentUser());
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await api.get('/user');
+        setUser(response.data);
+        localStorage.setItem('user', JSON.stringify(response.data));
+      } catch (error) {
+        console.error('Failed to sync user in DriverDashboard', error);
+      }
+    };
+    fetchUser();
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -107,6 +122,7 @@ export default function DriverDashboard() {
           <Route path="/earnings" element={<DriverEarnings />} />
         </Routes>
       </main>
+      <ChatWidget />
     </div>
   );
 }

@@ -15,6 +15,7 @@ import LogisticsOversight from './admin/LogisticsOversight';
 import AdminReports from './admin/AdminReports';
 import ComplaintsSupport from './admin/ComplaintsSupport';
 import authService from '../services/authService';
+import ChatWidget from '../components/ChatWidget';
 import './FarmerDashboard.css'; // Reusing base layout styles
 
 export default function AdminDashboard() {
@@ -104,6 +105,7 @@ export default function AdminDashboard() {
           <Route path="/complaints" element={<ComplaintsSupport />} />
         </Routes>
       </main>
+      <ChatWidget />
     </div>
   );
 }

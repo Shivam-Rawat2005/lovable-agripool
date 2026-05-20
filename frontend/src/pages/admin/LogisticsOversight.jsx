@@ -84,11 +84,11 @@ export default function LogisticsOversight() {
 
         {settlements.length > 0 ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-            {/* 🤝 1v1 Direct Deliveries Section */}
+            {/* 🤝 Private Deliveries Section */}
             {directSettlements.length > 0 && (
               <div>
                 <h3 style={{ fontSize: '1rem', fontWeight: '700', color: '#b45309', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  🤝 1v1 Direct Deliveries ({directSettlements.length})
+                  🤝 Private Deliveries ({directSettlements.length})
                 </h3>
                 <div style={{ display: 'grid', gap: '0.75rem' }}>
                   {directSettlements.map((s) => {

@@ -109,7 +109,7 @@ export default function AssignedTrips() {
             transition: 'all 0.2s ease'
           }}
         >
-          Direct 1v1 Shipments ({directTrips.length})
+          Private Shipments ({directTrips.length})
         </button>
         <button
           onClick={() => setActiveTab('pools')}
@@ -200,7 +200,7 @@ export default function AssignedTrips() {
                 </div>
                 <div className="trip-stat-box">
                   <div className="trip-stat-label" style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Type</div>
-                  <div className="trip-stat-value" style={{ fontWeight: '700' }}>{isRequest ? 'Direct (1v1)' : 'Pooling Offer'}</div>
+                  <div className="trip-stat-value" style={{ fontWeight: '700' }}>{isRequest ? 'Private Booking' : 'Pooling Offer'}</div>
                 </div>
                 <div className="trip-stat-box">
                   <div className="trip-stat-label" style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Stops</div>

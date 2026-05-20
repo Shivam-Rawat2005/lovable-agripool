@@ -41,7 +41,7 @@ class TripController extends Controller
         $transportRequest->update([
             'driver_id' => Auth::id(),
             'vehicle_id' => $request->vehicle_id,
-            'status' => 'In-Transit'
+            'status' => 'Matched'
         ]);
 
         $vehicle = \App\Models\Vehicle::find($request->vehicle_id);

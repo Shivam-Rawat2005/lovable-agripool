@@ -29,6 +29,7 @@ Route::middleware('auth:sanctum')->group(function() {
     // Transport Requests
     Route::get('/requests', [TransportRequestController::class, 'index']);
     Route::post('/requests', [TransportRequestController::class, 'store']);
+    Route::post('/requests/{id}/pay', [TransportRequestController::class, 'payRequest']);
 
     // Pools
     Route::get('/pools', [PoolController::class, 'index']);
@@ -49,4 +50,9 @@ Route::middleware('auth:sanctum')->group(function() {
     // Admin Escrow Settlements
     Route::get('/admin/settlements', [\App\Http\Controllers\TripController::class, 'getPendingSettlements']);
     Route::post('/admin/settlements/{id}/approve', [\App\Http\Controllers\TripController::class, 'approveSettlement']);
+
+    // Live Chat Support
+    Route::get('/chat/messages', [\App\Http\Controllers\ChatController::class, 'getMessages']);
+    Route::post('/chat/messages', [\App\Http\Controllers\ChatController::class, 'sendMessage']);
+    Route::get('/chat/status', [\App\Http\Controllers\ChatController::class, 'getStatus']);
 });

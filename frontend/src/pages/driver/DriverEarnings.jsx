@@ -140,7 +140,7 @@ export default function DriverEarnings() {
                       {(e._id || e.id)?.substring(0, 8).toUpperCase()}
                     </td>
                     <td style={{ padding: '1.25rem 2rem', fontWeight: '500' }}>
-                      {isRequest ? 'Direct (1v1)' : 'Pool Trip'}
+                      {isRequest ? 'Private Booking' : 'Pool Trip'}
                     </td>
                     <td style={{ padding: '1.25rem 2rem' }}>{e.preferred_date || e.date}</td>
                     <td style={{ padding: '1.25rem 2rem', color: 'var(--text-muted)' }}>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, 
@@ -15,12 +15,27 @@ import FindPools from './farmer/FindPools';
 import MyBookings from './farmer/MyBookings';
 import FarmerProfile from './farmer/FarmerProfile';
 import authService from '../services/authService';
+import api from '../services/api';
+import ChatWidget from '../components/ChatWidget';
 import './FarmerDashboard.css';
 
 export default function FarmerDashboard() {
   const navigate = useNavigate();
   const location = useLocation();
-  const user = authService.getCurrentUser();
+  const [user, setUser] = useState(() => authService.getCurrentUser());
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await api.get('/user');
+        setUser(response.data);
+        localStorage.setItem('user', JSON.stringify(response.data));
+      } catch (error) {
+        console.error('Failed to sync user in FarmerDashboard', error);
+      }
+    };
+    fetchUser();
+  }, []);
 
   const menuItems = [
     { label: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/farmer' },
@@ -81,7 +96,7 @@ export default function FarmerDashboard() {
           <div className="user-profile">
             <div className="user-info">
               <span className="user-name">{user?.name || 'Ravi Kumar'}</span>
-              <span className="user-role" style={{ textTransform: 'capitalize' }}>{user?.role || 'farmer'}</span>
+              <span className="user-role" style={{ textTransform: 'capitalize' }}>farmer</span>
               <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                 {user?.email?.includes('demo.com') ? 'Demo session' : 'Registered session'}
               </span>
@@ -100,6 +115,7 @@ export default function FarmerDashboard() {
           <Route path="/profile" element={<FarmerProfile />} />
         </Routes>
       </main>
+      <ChatWidget />
     </div>
   );
 }
